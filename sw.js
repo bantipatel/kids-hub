@@ -1,114 +1,78 @@
 // Kids Learning Hub — Service Worker
-// Caches all game assets for offline play
+// Optimised for GitHub Pages: bantipatel.github.io/kids-hub/
 
-const CACHE_NAME = 'kids-hub-v1';
+const CACHE_NAME = 'kids-hub-v2';
+const BASE = '/kids-hub';
 
-// Files to cache on install
 const PRECACHE_URLS = [
-  './kids-learning-hub.html',
-  './manifest.json',
+  BASE + '/kids-learning-hub.html',
+  BASE + '/manifest.json',
+  BASE + '/icon-120.png',
+  BASE + '/icon-152.png',
+  BASE + '/icon-180.png',
+  BASE + '/icon-192.png',
+  BASE + '/icon-512.png',
+  BASE + '/splash-1290x2796.png',
+  // Google Fonts
   'https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F34E.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/26BD.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F431.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F436.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F418.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F41F.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F347.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F3A9.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F368.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1FAB8.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1FA81.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F981.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F412.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1FAB9.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F989.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F427.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F451.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F308.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/2600.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F405.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/2602.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F30B.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F349.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F3B8.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F9AC.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F993.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F404.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F986.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F438.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F41D.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F40D.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F434.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F437.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F411.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F414.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F42F.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F43B.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F99C.svg',
-  'https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/1F43A.svg'
+  // All OpenMoji emoji images used in the game
+  ...[
+    '1F34E','26BD','1F431','1F436','1F418','1F41F','1F347','1F3A9',
+    '1F368','1FAB8','1FA81','1F981','1F412','1FAB9','1F989','1F427',
+    '1F451','1F308','2600','1F405','2602','1F30B','1F349','1F3B8',
+    '1F9AC','1F993','1F404','1F986','1F438','1F41D','1F40D','1F434',
+    '1F437','1F411','1F414','1F42F','1F43B','1F99C','1F43A'
+  ].map(h => `https://cdn.jsdelivr.net/npm/openmoji@15.0.0/color/svg/${h}.svg`)
 ];
 
-// Install — cache all assets
-self.addEventListener('install', function(event) {
+// ── Install: cache everything ──
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache) {
-      // Cache local files first (must succeed)
-      return cache.addAll(['./kids-learning-hub.html', './manifest.json'])
-        .then(function() {
-          // Cache remote assets individually (failure of one won't block install)
-          return Promise.allSettled(
-            PRECACHE_URLS.filter(u => u.startsWith('http')).map(function(url) {
-              return cache.add(url).catch(function(e) {
-                console.warn('Could not cache:', url, e);
-              });
-            })
-          );
-        });
-    }).then(function() {
-      return self.skipWaiting();
-    })
-  );
-});
-
-// Activate — delete old caches
-self.addEventListener('activate', function(event) {
-  event.waitUntil(
-    caches.keys().then(function(keys) {
-      return Promise.all(
-        keys.filter(function(k) { return k !== CACHE_NAME; })
-            .map(function(k) { return caches.delete(k); })
+    caches.open(CACHE_NAME).then(async cache => {
+      // Cache local files (critical — must succeed)
+      await cache.addAll([
+        BASE + '/kids-learning-hub.html',
+        BASE + '/manifest.json',
+      ]);
+      // Cache remote assets (best-effort — failures won't block install)
+      await Promise.allSettled(
+        PRECACHE_URLS
+          .filter(u => u.startsWith('http'))
+          .map(u => cache.add(u).catch(() => {}))
       );
-    }).then(function() {
-      return self.clients.claim();
-    })
+    }).then(() => self.skipWaiting())
   );
 });
 
-// Fetch — cache-first strategy (great for offline)
-self.addEventListener('fetch', function(event) {
-  // Only handle GET requests
+// ── Activate: clean old caches ──
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
+  );
+});
+
+// ── Fetch: cache-first (works offline) ──
+self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then(function(cached) {
+    caches.match(event.request).then(cached => {
       if (cached) return cached;
 
-      // Not in cache — fetch from network and cache for next time
-      return fetch(event.request).then(function(response) {
-        // Only cache valid responses
-        if (!response || response.status !== 200 || response.type === 'error') {
-          return response;
+      return fetch(event.request).then(response => {
+        if (response && response.status === 200 && response.type !== 'error') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
         }
-        var toCache = response.clone();
-        caches.open(CACHE_NAME).then(function(cache) {
-          cache.put(event.request, toCache);
-        });
         return response;
-      }).catch(function() {
-        // Offline fallback for navigation requests
+      }).catch(() => {
+        // Offline fallback: serve the app shell
         if (event.request.mode === 'navigate') {
-          return caches.match('./kids-learning-hub.html');
+          return caches.match(BASE + '/kids-learning-hub.html');
         }
       });
     })

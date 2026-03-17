@@ -2,38 +2,39 @@
   "name": "Kids Learning Hub",
   "short_name": "Kids Hub",
   "description": "Fun alphabet, counting, animal sounds, puzzle and coloring games for kids!",
-  "start_url": "./kids-learning-hub.html",
+  "start_url": "/kids-hub/kids-learning-hub.html",
+  "scope": "/kids-hub/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#a8edea",
   "theme_color": "#a8edea",
   "icons": [
     {
-      "src": "icon-120.png",
+      "src": "/kids-hub/icon-120.png",
       "sizes": "120x120",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-152.png",
+      "src": "/kids-hub/icon-152.png",
       "sizes": "152x152",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-180.png",
+      "src": "/kids-hub/icon-180.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-192.png",
+      "src": "/kids-hub/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "/kids-hub/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
